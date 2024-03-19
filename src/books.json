@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Toreto",
+    "description": "Libro de Sofía Caucota",
+    "code": "abc12",
+    "price": 123456,
+    "status": true,
+    "stock": 20,
+    "category": "Suspenso"
+  },
+  {
+    "id": 2,
+    "title": "María",
+    "description": "Libro de John Green",
+    "code": "abc123",
+    "price": 123456,
+    "status": true,
+    "stock": 20,
+    "category": "Romance"
+  },
+  {
+    "id": 3,
+    "title": "Lorena",
+    "description": "Libro de John Green",
+    "code": "abc1234",
+    "price": 123456,
+    "status": true,
+    "stock": 20,
+    "category": "Romance"
+  }
+]
