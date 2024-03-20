@@ -1,21 +1,11 @@
 import express from "express";
 import CartManager from "../controllers/cartManager.js";
+import ProductManager from "../controllers/ProductManager.js";
 const router = express.Router();
 const cartManager = new CartManager;
+const productManager = new ProductManager;
 
-router.get("/api/carts", async (req, res) => {
-    try{
-        const carts = await cartManager.getCarts();
-
-        res.send(carts)
-    }catch (error) {
-        console.log("Error al obtener los libros:", error);
-        res.send("Error al obtener los libros");
-    }
-});
-
-
-router.get("/api/carts/:cid", async (req, res) => {
+router.get("/carts/:cid", async (req, res) => {
     try{
         let id = parseInt(req.params.cid)
 
@@ -24,7 +14,7 @@ router.get("/api/carts/:cid", async (req, res) => {
         if(selectedCart) {
             res.send(selectedCart);
         }else {
-            res.send({ error: "Carrito no encontrado" });
+            res.status(404).send({ error: `El carrito de ID ${id} no existe` });;
         }
 
     }catch (error) {
@@ -33,25 +23,29 @@ router.get("/api/carts/:cid", async (req, res) => {
     }
 });
 
-router.post("/api/carts", async (req, res) => {
+router.post("/carts", async (req, res) => {
     try {
 
         await cartManager.addCart();
 
-        res.status(200).send({ message: "Carrito agregado correctamente" });
+        res.status(200).send({ message: "Carrito creado correctamente" });
     } catch (error) {
-        console.error("Error al agregar el producto:", error);
+        console.error("Error al crear el carrito:", error);
         res.status(500).send({ error: "Error interno del servidor" });
     }
 });
 
-router.post("/api/carts/:cid/product/:pid", async (req, res) => {
+router.post("/carts/:cid/product/:pid", async (req, res) => {
     try{
         let productId = parseInt(req.params.pid);
         let cartId = parseInt(req.params.cid);
-        const { quantity } = req.body;
 
-        await cartManager.addProductToCart(cartId, productId, quantity);
+        const product = await productManager.getProductById(productId);
+        if (!product) {
+            return res.status(404).send({ error: `El producto con ID ${productId} no existe` });
+        }
+
+        await cartManager.addProductToCart(cartId, productId);
         res.status(200).send({ message: "Producto agregado correctamente" });
     } catch (error) {
         console.error("Error al agregar el producto:", error);

@@ -4,7 +4,7 @@ import ProductManager from "./productManager.js";
 class cartManager {
     static idCart = 0;
     constructor() {
-        this.path = "./src/cart.json";
+        this.path = "./src/models/carts.json";
         this.carts = [];
         this.productManager = new ProductManager();
         this.loadCarts();
@@ -20,9 +20,8 @@ class cartManager {
                 cartManager.idCart = maxId;
             }
         } catch (error) {
-            if (error.code !== 'ENOENT') {
-                console.log("Error al cargar los carritos:", error);
-            }
+            console.log("Error al cargar los carritos:", error);
+            await this.addCart();
         }
     }
 
@@ -32,14 +31,13 @@ class cartManager {
             const newCart = { id: cartManager.idCart, products: [] };
             this.carts.push(newCart);
             await fs.writeFile(this.path, JSON.stringify(this.carts, null, 2));
-            console.log(`Nuevo carrito agregado con ID ${cartManager.idCart}`);
             return cartManager.idCart;
         } catch (error) {
             console.log("Error al agregar el nuevo carrito:", error);
         }
     }
 
-    async addProductToCart(cartId, productId, quantity) {
+    async addProductToCart(cartId, productId) {
         try {
             const product = await this.productManager.getProductById(productId);
 
@@ -57,41 +55,22 @@ class cartManager {
 
             const cart = this.carts[cartIndex];
 
-            // Verificar si el producto ya está en el carrito
             const existingProductIndex = cart.products.findIndex(prod => prod.id === productId);
 
             if (existingProductIndex !== -1) {
-                // Si el producto ya está en el carrito, actualiza la cantidad
-                cart.products[existingProductIndex].quantity += quantity;
+                
+                cart.products[existingProductIndex].quantity++;
             } else {
-                // Si el producto no está en el carrito, agrégalo
                 cart.products.push({
                     id: productId,
-                    quantity: quantity
+                    quantity: 1
                 });
             }
 
-            // Guardar los cambios en el archivo cart.json
             await fs.writeFile(this.path, JSON.stringify(this.carts, null, 2));
             console.log(`Producto con ID "${productId}" agregado al carrito con ID ${cartId}`);
         } catch (error) {
             console.log("Error al agregar el producto al carrito", error);
-        }
-    }
-
-    getCarts = async () => {
-        try {
-            const allCarts = await fs.readFile(this.path, "utf-8");
-            const parsedCarts = JSON.parse(allCarts);
-    
-            if (parsedCarts.length === 0) {
-                console.log("No hay carritos disponibles.");
-            }
-            
-            return parsedCarts;
-        } catch (error) {
-            console.error("Error al obtener los carritos:", error);
-            return this.carts;
         }
     }
 

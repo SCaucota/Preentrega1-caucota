@@ -3,7 +3,7 @@ import ProductManager from "../controllers/productManager.js";
 const router = express.Router();
 const bookManager = new ProductManager;
 
-router.get("/api/products", async (req, res) => {
+router.get("/products", async (req, res) => {
     try{
         const books = await bookManager.getProducts();
 
@@ -21,7 +21,7 @@ router.get("/api/products", async (req, res) => {
     }
 });
 
-router.get("/api/products/:pid", async (req, res) => {
+router.get("/products/:pid", async (req, res) => {
     try{
         let id = parseInt(req.params.pid)
 
@@ -39,15 +39,22 @@ router.get("/api/products/:pid", async (req, res) => {
     }
 });
 
-router.post("/api/products", async (req, res) => {
+router.post("/products", async (req, res) => {
     try {
-        const { title, description, code, price, stock, category } = req.body;
+        const { title, description, code, price, stock, category, thumbnails } = req.body;
 
         if (!title || !description || !code || !price || !stock || !category) {
             return res.status(400).send({ error: "Todos los campos del producto son obligatorios" });
         }
 
-        await bookManager.addProduct(title, description, code, price, true, stock, category);
+        const books = await bookManager.getProducts();
+        const existedCode = books.find(prod => prod.code === code);
+
+        if (existedCode){
+            return res.status(400).send({ error: "El campo code ya está asignado a otro producto" })
+        }
+
+        await bookManager.addProduct(title, description, code, price, true, stock, category, thumbnails);
 
         res.status(200).send({ message: "Producto agregado correctamente" });
     } catch (error) {
@@ -56,7 +63,7 @@ router.post("/api/products", async (req, res) => {
     }
 });
 
-router.put("/api/products/:pid", async (req, res) => {
+router.put("/products/:pid", async (req, res) => {
     try {
         const id = parseInt(req.params.pid);
         const updateFields = req.body;
@@ -79,8 +86,8 @@ router.put("/api/products/:pid", async (req, res) => {
     }
 });
 
-router.delete("/api/products/:pid", async (req, res) => {
-    let id = parseInt(req.params.id);
+router.delete("/products/:pid", async (req, res) => {
+    let id = parseInt(req.params.pid);
     await bookManager.deleteProduct(id);
     res.status(200).send({ message: "Producto eliminado correctamente" });
 });

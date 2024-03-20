@@ -1,10 +1,9 @@
-/* const fs = require("fs").promises; */
 import {promises as fs} from "fs";
 
 class ProductManager {
     static idProduct = 0;
     constructor() {
-        this.path = "./src/books.json";
+        this.path = "./src/models/books.json";
         this.products = [];
         this.loadProducts();
     }
@@ -25,7 +24,7 @@ class ProductManager {
         }
     }
 
-    addProduct = async (title, description, code, price, status, stock, category) => {
+    addProduct = async (title, description, code, price, status, stock, category, thumbnails) => {
         try {
             if (!title ||
                 !description ||
@@ -54,7 +53,8 @@ class ProductManager {
                 price: price,
                 status: true,
                 stock: stock,
-                category: category
+                category: category,
+                thumbnails:[]
             });
 
             await fs.writeFile(this.path, JSON.stringify(this.products, null, 2))
